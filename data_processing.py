@@ -7,6 +7,8 @@ import argparse
 import numpy as np
 import re
 from typing import Any, List, Tuple, Union
+from tkinter import filedialog
+from tkinter import *
 
 # Local imports
 # None
@@ -24,7 +26,8 @@ def cli_parser() -> Any:
 
     parser.add_argument(
         '-I', '--input-dir', action='store', dest='input_dir', type=str,
-        required=True, help='Input directory which contains all the data.'
+        default=None, help='Input directory which contains all the data. '
+        'If None, the user will be prompted to select a directory via GUI.'
     )
     parser.add_argument(
         '-F', '--file', action='store', dest='input_basefile', type=str,
@@ -39,6 +42,21 @@ def cli_parser() -> Any:
 
     args = parser.parse_args()
     return args
+
+
+def get_folder_from_GUI() -> str:
+    """
+    Allow the user to choose a folder through a Graphical-User-Interface.
+
+    Returns
+    -------
+    str
+        Path to the folder.
+    """
+    root = Tk()
+    root.withdraw()
+    folder_selected = filedialog.askdirectory()
+    return folder_selected
 
 
 def polar2cart(
@@ -276,8 +294,14 @@ class DataProcessor:
 
 def main() -> None:
     args = cli_parser()
+
+    if args.input_dir is None:
+        input_dir = get_folder_from_GUI()
+    else:
+        input_dir = args.input_dir
+
     data_processor = DataProcessor(
-        input_dir=args.input_dir,
+        input_dir=input_dir,
         input_basefile=args.input_basefile,
         output_dir=args.output_dir
     )
