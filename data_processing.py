@@ -5,6 +5,7 @@
 import os
 import argparse
 import numpy as np
+import re
 from typing import Any, List, Tuple, Union
 
 # Local imports
@@ -27,7 +28,8 @@ def cli_parser() -> Any:
     )
     parser.add_argument(
         '-F', '--file', action='store', dest='input_basefile', type=str,
-        required=True, help='Input basefile name.'
+        default=None, help='Input basefile name. If None, all the files in '
+        'the input directory will be processed.'
     )
     parser.add_argument(
         '-O', '--output-dir', action='store', dest='output_dir', type=str,
@@ -62,6 +64,23 @@ def polar2cart(
     return x, y
 
 
+def get_number_in_a_string(string: str) -> int:
+    """
+    Return the number (int) present in a string.
+
+    Parameters
+    ----------
+    string : str
+        String containing a number.
+    
+    Returns
+    -------
+    int
+        Number present in the string.
+    """
+    return list(map(int, re.findall(r'\d+', string)))[0]
+
+
 class DataProcessor:
     """
     A class to process the output files from XPDC code for various properties,
@@ -79,6 +98,7 @@ class DataProcessor:
     input_basefile : str
         Input basefile name.
         Eg : Benchmark_1.txt
+        If None, all the files in the input directory will be processed.
     output_dir : str
         Output directory. If None, a folder named '_processed_data' will be
         created in the input directory, and the output files will be stored
@@ -87,10 +107,14 @@ class DataProcessor:
     """
 
     def __init__(
-        self, input_dir: str, input_basefile: str, output_dir: str = None
+        self, input_dir: str, input_basefile: str = None, output_dir: str = None
     ) -> None:
         self.input_dir = input_dir
-        self.input_basefile = input_basefile
+        self.properties = self._get_properties()
+
+        self.input_data_files = self._get_input_data_files(
+            input_basefile=input_basefile
+        )
 
         if output_dir is None:
             self.output_dir = os.path.join(input_dir, "_processed_data")
@@ -98,15 +122,7 @@ class DataProcessor:
         else:
             self.output_dir = output_dir
 
-        self.output_fname = os.path.join(
-            self.output_dir, self.input_basefile.replace(".txt", ".npz")
-        )
-
-        self.properties = self._get_properties()
-
-        self.data: Union[None, dict] = None
-
-    # Private methods
+    # Private methods    
     def _get_properties(self) -> List[str]:
         """
         Get all the properties available in the input directory.
@@ -123,7 +139,19 @@ class DataProcessor:
             raise ValueError('No properties found in the input directory.')
         return properties
 
-    def _get_input_filename(self, prop: str) -> str:
+    def _get_input_data_files(
+        self, input_basefile:Union[str, None]
+    ) -> List[str]:
+        if not (input_basefile is None):
+            return [input_basefile]
+        else:
+            filenames = os.listdir(
+                os.path.join(self.input_dir, self.properties[0])
+            )
+            filenames.sort(key=get_number_in_a_string)
+            return filenames
+
+    def _get_input_file(self, prop: str, fname:str) -> str:
         """
         Get the input filename for the given property.
 
@@ -131,17 +159,35 @@ class DataProcessor:
         ----------
         prop : str
             Property name.
+        fname : str
+            Filename.
 
         Returns
         -------
         str
             Input filename.
         """
-        return os.path.join(self.input_dir, prop, self.input_basefile)
-
-    def _read_data(self, input_file: str) -> List[str]:
+        return os.path.join(self.input_dir, prop, fname)
+    
+    def _get_output_fname(self, fname:str) -> str:
         """
-        Read the data from the given input file.
+        Get the output filename for the given filename.
+
+        Parameters
+        ----------
+        fname : str
+            Filename.
+
+        Returns
+        -------
+        str
+            Output filename.
+        """
+        return os.path.join(self.output_dir, fname.replace(".txt", ".npz"))
+
+    def _read_lines(self, input_file: str) -> List[str]:
+        """
+        Read the lines from the given input file.
 
         Parameters
         ----------
@@ -197,30 +243,27 @@ class DataProcessor:
     # Public methods
     def process_data(self) -> None:
         """
-        Process the data from the input files, and store it as a single file
-        for each property.
+        Process the data from the input files, and store it as a  single file
+        (format: .npz).
         """
-        data = dict()
-        for prop in self.properties:
-            input_file = self._get_input_filename(prop)
-            lines = self._read_data(input_file)
-            time, r, theta, scalar_property = self._get_simulation_data(lines)
+        for fname in self.input_data_files:
+            data = dict()
+            for prop in self.properties:
+                input_file = self._get_input_file(prop=prop, fname=fname)
+                lines = self._read_lines(input_file)
+                time, r, theta, scalar_property = self._get_simulation_data(
+                    lines
+                )
 
-            if 't' not in data:
-                data['t'], data['r'], data['theta'] = time, r, theta
-            data[prop] = scalar_property
+                if 't' not in data:
+                    data['t'], data['r'], data['theta'] = time, r, theta
+                data[prop] = scalar_property
 
-        data['x'], data['y'] = polar2cart(data['r'], data['theta'])
-        self.data = data
-
-    def save_data(self) -> None:
-        """
-        Save the processed data as a single file (format: .npz).
-        """
-        if self.data is None:
-            raise ValueError('No data to save. Run process_data() first.')
-        np.savez(self.output_fname, **self.data)
-        print(f"Saved data to {self.output_fname}")
+            data['x'], data['y'] = polar2cart(data['r'], data['theta'])
+            
+            output_fname = self._get_output_fname(fname=fname)
+            np.savez(output_fname, **data)
+            print(f"Saved data : {output_fname}")        
 
 
 def main() -> None:
@@ -231,7 +274,6 @@ def main() -> None:
         output_dir=args.output_dir
     )
     data_processor.process_data()
-    data_processor.save_data()
 
 
 ###########################################################################
