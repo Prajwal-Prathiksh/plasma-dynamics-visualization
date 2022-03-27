@@ -72,7 +72,7 @@ def generate_flake8_command(file: str) -> str:
     return cmd
 
 
-def main():
+def main() -> None:
     try:
         import autopep8 as at
     except ImportError:
