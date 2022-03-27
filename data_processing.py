@@ -13,6 +13,8 @@ from typing import Any, List, Tuple, Union
 ###########################################################################
 # Code
 ###########################################################################
+
+
 def cli_parser() -> Any:
     parser = argparse.ArgumentParser(
         allow_abbrev=False,
@@ -29,12 +31,13 @@ def cli_parser() -> Any:
     )
     parser.add_argument(
         '-O', '--output-dir', action='store', dest='output_dir', type=str,
-        default=None, help="Output directory. If None, a folder named "\
-            "'_processed_data' will be created in the input directory"
+        default=None, help="Output directory. If None, a folder named "
+        "'_processed_data' will be created in the input directory"
     )
 
     args = parser.parse_args()
     return args
+
 
 def polar2cart(
     r: Union[float, np.ndarray], theta: Union[float, np.ndarray]
@@ -48,7 +51,7 @@ def polar2cart(
         Radius.
     theta : float or ndarray
         Angle.
-    
+
     Returns
     -------
     Tuple[float, float] or Tuple[ndarray, ndarray]
@@ -57,6 +60,7 @@ def polar2cart(
     x = r * np.cos(theta)
     y = r * np.sin(theta)
     return x, y
+
 
 class DataProcessor:
     """
@@ -73,12 +77,13 @@ class DataProcessor:
         Output directory. If None, a folder named '_processed_data' will be
         created in the input directory.
     """
+
     def __init__(
-        self, input_dir: str, input_basefile: str, output_dir: str=None
+        self, input_dir: str, input_basefile: str, output_dir: str = None
     ) -> None:
         self.input_dir = input_dir
         self.input_basefile = input_basefile
-        
+
         if output_dir is None:
             self.output_dir = os.path.join(input_dir, "_processed_data")
             os.makedirs(self.output_dir, exist_ok=True)
@@ -88,10 +93,10 @@ class DataProcessor:
         self.output_fname = os.path.join(
             self.output_dir, self.input_basefile.replace(".txt", ".npz")
         )
-        
+
         self.properties = self._get_properties()
 
-        self.data:Union[None, dict] = None
+        self.data: Union[None, dict] = None
 
     # Private methods
     def _get_properties(self) -> List[str]:
@@ -109,8 +114,8 @@ class DataProcessor:
         if properties == []:
             raise ValueError('No properties found in the input directory.')
         return properties
-    
-    def _get_input_filename(self, prop:str) -> str:
+
+    def _get_input_filename(self, prop: str) -> str:
         """
         Get the input filename for the given property.
 
@@ -118,7 +123,7 @@ class DataProcessor:
         ----------
         prop : str
             Property name.
-        
+
         Returns
         -------
         str
@@ -167,7 +172,7 @@ class DataProcessor:
             time = float(lines[1].split()[2][:-1])
         except Exception as e:
             print(
-                "Time not found in the input file. Check the input file's "\
+                "Time not found in the input file. Check the input file's "
                 "format."
             )
             raise e
@@ -192,7 +197,7 @@ class DataProcessor:
             input_file = self._get_input_filename(prop)
             lines = self._read_data(input_file)
             time, r, theta, scalar_property = self._get_simulation_data(lines)
-            
+
             if 't' not in data:
                 data['t'], data['r'], data['theta'] = time, r, theta
             data[prop] = scalar_property
@@ -208,6 +213,7 @@ class DataProcessor:
             raise ValueError('No data to save. Run process_data() first.')
         np.savez(self.output_fname, **self.data)
         print(f"Saved data to {self.output_fname}")
+
 
 def main() -> None:
     args = cli_parser()
