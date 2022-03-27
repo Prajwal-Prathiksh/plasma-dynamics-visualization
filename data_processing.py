@@ -72,7 +72,7 @@ def get_number_in_a_string(string: str) -> int:
     ----------
     string : str
         String containing a number.
-    
+
     Returns
     -------
     int
@@ -107,7 +107,10 @@ class DataProcessor:
     """
 
     def __init__(
-        self, input_dir: str, input_basefile: str = None, output_dir: str = None
+        self,
+        input_dir: str,
+        input_basefile: str = None,
+        output_dir: str = None
     ) -> None:
         self.input_dir = input_dir
         self.properties = self._get_properties()
@@ -122,7 +125,7 @@ class DataProcessor:
         else:
             self.output_dir = output_dir
 
-    # Private methods    
+    # Private methods
     def _get_properties(self) -> List[str]:
         """
         Get all the properties available in the input directory.
@@ -140,18 +143,20 @@ class DataProcessor:
         return properties
 
     def _get_input_data_files(
-        self, input_basefile:Union[str, None]
+        self, input_basefile: Union[str, None]
     ) -> List[str]:
         if not (input_basefile is None):
+            self.n_leading_zeros = 4
             return [input_basefile]
         else:
             filenames = os.listdir(
                 os.path.join(self.input_dir, self.properties[0])
             )
             filenames.sort(key=get_number_in_a_string)
+            self.n_leading_zeros = len(str(len(filenames)))
             return filenames
 
-    def _get_input_file(self, prop: str, fname:str) -> str:
+    def _get_input_file(self, prop: str, fname: str) -> str:
         """
         Get the input filename for the given property.
 
@@ -168,8 +173,8 @@ class DataProcessor:
             Input filename.
         """
         return os.path.join(self.input_dir, prop, fname)
-    
-    def _get_output_fname(self, fname:str) -> str:
+
+    def _get_output_fname(self, fname: str) -> str:
         """
         Get the output filename for the given filename.
 
@@ -183,7 +188,10 @@ class DataProcessor:
         str
             Output filename.
         """
-        return os.path.join(self.output_dir, fname.replace(".txt", ".npz"))
+        fname = fname.replace(".txt", ".npz")
+        idx = str(get_number_in_a_string(fname))
+        fname = fname.replace(idx, idx.zfill(self.n_leading_zeros))
+        return os.path.join(self.output_dir, fname)
 
     def _read_lines(self, input_file: str) -> List[str]:
         """
@@ -260,10 +268,10 @@ class DataProcessor:
                 data[prop] = scalar_property
 
             data['x'], data['y'] = polar2cart(data['r'], data['theta'])
-            
+
             output_fname = self._get_output_fname(fname=fname)
             np.savez(output_fname, **data)
-            print(f"Saved data : {output_fname}")        
+            print(f"Saved data : {output_fname}")
 
 
 def main() -> None:
