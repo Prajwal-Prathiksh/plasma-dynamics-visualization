@@ -71,11 +71,19 @@ class DataProcessor:
     ----------
     input_dir : str
         Input directory which contains all the data.
+        Eg : /home/user/data/
+        `data` folder here will contain sub-folders for each property, eg:
+            - /home/user/data/rho
+            - /home/user/data/phi
+            - /home/user/data/magnetic_field_strength
     input_basefile : str
         Input basefile name.
+        Eg : Benchmark_1.txt
     output_dir : str
         Output directory. If None, a folder named '_processed_data' will be
-        created in the input directory.
+        created in the input directory, and the output files will be stored
+        there.
+        Eg : /home/user/data/_preprocessed_data/Benchmark_1.npz
     """
 
     def __init__(
