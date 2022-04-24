@@ -29,7 +29,17 @@ class AutomatorGUI(HasTraits):
                 name='data_input_dir',
                 label='Data Input Directory',
                 has_focus=True,
-                help='Input directory which contains all the data.',
+                help='Input directory which contains all the data. '
+                '\nEg : /home/user/data/'
+                '   Here the `data` folder will contain sub-folders for each '
+                'property, eg:'
+                '   - /home/user/data/rho '
+                '   - /home/user/data/phi '
+                '   - /home/user/data/magnetic_field_strength. '
+                "   A folder named '_processed_data' will be created in "
+                'the input directory, and the output files will be stored '
+                'there. '
+                '   Eg : /home/user/data/_preprocessed_data/Benchmark_1.npz',
                 tooltip='Input directory which contains all the data.'
             ),
             Item(
