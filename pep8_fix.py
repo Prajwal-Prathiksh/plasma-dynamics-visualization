@@ -85,7 +85,7 @@ def main() -> None:
     print("\n\nRunning Autopep8.")
     print("----------------------------------------------------------------")
     for file in files:
-        print(F"\nFile: {file}")
+        print(F"\n<<<<< File: {file} >>>>>")
         cmd = generate_autopep8_command(file)
         print(f"Running cmd : {cmd}")
         os.system(cmd)
@@ -94,7 +94,7 @@ def main() -> None:
     print("\n\nRunning Flake8.")
     print("----------------------------------------------------------------")
     for file in files:
-        print(F"\nFile: {file}")
+        print(F"\n<<<<< File: {file} >>>>>")
         cmd = generate_flake8_command(file)
         print(f"Running cmd : {cmd}")
         os.system(cmd)
