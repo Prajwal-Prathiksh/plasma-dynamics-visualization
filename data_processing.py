@@ -17,6 +17,10 @@ from tkinter import *
 # Code
 ###########################################################################
 
+# TODO
+# - GUI when setup from CLI
+# - should ask for input_dir and output_dir
+# - should ask parallel, or serial
 
 def cli_parser() -> Any:
     parser = argparse.ArgumentParser(
@@ -97,6 +101,27 @@ def get_number_in_a_string(string: str) -> int:
         Number present in the string.
     """
     return list(map(int, re.findall(r'\d+', string)))[0]
+
+def convert_x_y_array_to_mgrid(x_array: np.ndarray, y_array: np.ndarray) -> np.ndarray:
+    """
+    Convert x and y arrays to a mgrid.
+
+    Parameters
+    ----------
+    x_array : ndarray
+        Array containing x coordinates.
+    y_array : ndarray
+        Array containing y coordinates.
+
+    Returns
+    -------
+    ndarray
+        mgrid containing x and y coordinates.
+    """
+    x_array = np.array(x_array)
+    y_array = np.array(y_array)
+    x_mgrid, y_mgrid = np.meshgrid(x_array, y_array)
+    return x_mgrid, y_mgrid
 
 
 class DataProcessor:
