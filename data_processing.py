@@ -250,7 +250,7 @@ class DataProcessor:
 
     def _get_input_data_files(
         self, input_basefile: Union[str, None],
-        input_basefile_range: Union[Tuple[int, int],  None]
+        input_basefile_range: Union[Tuple[int, int], None]
     ) -> List[str]:
         if input_basefile is not None:
             self.n_leading_zeros = 4
@@ -374,7 +374,7 @@ class DataProcessor:
             If True, no output will be printed.
         """
         os.makedirs(self.output_dir, exist_ok=True)
-        
+
         for fname in self.input_data_files:
             data = dict()
             for prop in self.properties:

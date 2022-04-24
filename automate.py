@@ -7,12 +7,14 @@ from typing import Tuple
 from automan.api import Problem, Simulation, Automator
 
 # Local imports
-from data_processing import get_folder_from_GUI, DataProcessor
+from data_processing import DataProcessor
 from gui import AutomatorGUI
 
 ###########################################################################
 # Code
 ###########################################################################
+
+
 def get_batch_limits(length: int, batch: int):
     """
     Get the index limits for a given batch size, and the length of the original
@@ -36,6 +38,7 @@ def get_batch_limits(length: int, batch: int):
         lb += batch
     return batch_limits
 
+
 def tuple2string(tup: Tuple[int, int]) -> str:
     """
     Convert a tuple to a string.
@@ -52,6 +55,7 @@ def tuple2string(tup: Tuple[int, int]) -> str:
     """
     return f"{tup[0]}-{tup[1]}"
 
+
 class DataPreprocessingAutomator(Problem):
     def get_name(self):
         return "_data_preprocessing_TEMP"
@@ -59,7 +63,7 @@ class DataPreprocessingAutomator(Problem):
     def setup_params(self):
         automate_gui = AutomatorGUI()
         automate_gui.configure_traits()
-        
+
         data_input_dir = automate_gui.data_input_dir
         if data_input_dir == '' or data_input_dir is None:
             raise ValueError('No data input directory specified.')
@@ -79,7 +83,6 @@ class DataPreprocessingAutomator(Problem):
             length=len(temp_obj.input_data_files),
             batch=self.batch_size
         )
-
 
     def setup(self):
         self.setup_params()
@@ -101,7 +104,7 @@ class DataPreprocessingAutomator(Problem):
         else:
             self.cases = [
                 Simulation(
-                    root=f"_series_data_preprocessing_TEMP",
+                    root="_series_data_preprocessing_TEMP",
                     base_command=base_cmd,
                     input_dir=self.data_input_dir,
                 )
@@ -111,6 +114,7 @@ class DataPreprocessingAutomator(Problem):
 
     def run(self):
         self.make_output_dir()
+
 
 ###########################################################################
 # Main Code

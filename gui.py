@@ -16,6 +16,7 @@ from traitsui.api import (
 # Code
 ###########################################################################
 
+
 class AutomatorGUI(HasTraits):
     data_input_dir = Directory()
     quiet = Bool(default_value=True)
@@ -34,8 +35,10 @@ class AutomatorGUI(HasTraits):
             Item(
                 name='quiet',
                 label='Quiet',
-                help='If True, the program will not print anything to the console.',
-                tooltip='If True, the program will not print anything to the console.'
+                help='If True, the program will not print anything to '
+                'the console.',
+                tooltip='If True, the program will not print anything to '
+                'the console.'
             ),
             Item(
                 name='parallel',
@@ -47,8 +50,10 @@ class AutomatorGUI(HasTraits):
                 name='batch_size',
                 label='Batch Size',
                 enabled_when='parallel',
-                help='The number of files to process in each batch. Enabled only if parallel is True.',
-                tooltip='The number of files to process in each batch. Enabled only if parallel is True.'
+                help='The number of files to process in each batch. '
+                'Enabled only if parallel is True.',
+                tooltip='The number of files to process in each batch. '
+                'Enabled only if parallel is True.'
             ),
             show_border=True,
             label='Automator Settings',
@@ -58,3 +63,14 @@ class AutomatorGUI(HasTraits):
         width=600, height=500, resizable=True
     )
 
+
+###########################################################################
+# Main Code
+###########################################################################
+if __name__ == '__main__':
+    automator_gui = AutomatorGUI()
+    automator_gui.configure_traits()
+    print(f'Data input directory: {automator_gui.data_input_dir}')
+    print(f'Quiet: {automator_gui.quiet}')
+    print(f'Parallel: {automator_gui.parallel}')
+    print(f'Batch size: {automator_gui.batch_size}')
