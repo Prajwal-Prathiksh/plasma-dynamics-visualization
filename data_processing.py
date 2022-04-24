@@ -7,8 +7,7 @@ import argparse
 import numpy as np
 import re
 from typing import Any, List, Tuple, Union
-from tkinter import filedialog
-from tkinter import *
+from tkinter import filedialog, Tk
 
 # Local imports
 # None
@@ -22,7 +21,43 @@ from tkinter import *
 # - should ask for input_dir and output_dir
 # - should ask parallel, or serial
 
+
 def cli_parser() -> Any:
+
+    def get_range_from_string(string: str) -> Tuple[int, int]:
+        """
+        Return a range from a string.
+
+        Parameters
+        ----------
+        string : str
+            String containing a range, separated by a hyphen.
+            Eg: "1-10"
+
+        Returns
+        -------
+        Tuple[int, int]
+            Range.
+        """
+        if string is None:
+            return None
+        try:
+            start, end = string.split("-")
+            start = int(start)
+            end = int(end)
+        except ValueError:
+            raise ValueError(
+                f"Invalid range: {string}. "
+                "The range must be separated by a hyphen, and be of the form: "
+                "'start-end'."
+            )
+        if start >= end:
+            raise ValueError(
+                f"Invalid range: {string}. "
+                "The start of the range must be less than the end."
+            )
+        return start, end
+
     parser = argparse.ArgumentParser(
         allow_abbrev=False,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -39,12 +74,25 @@ def cli_parser() -> Any:
         'the input directory will be processed.'
     )
     parser.add_argument(
+        '-R', '--range', action='store', dest='input_basefile_range', type=str,
+        default=None, help='Input basefile range (inclusive limits). If None, '
+        'all the files in the input directory will be processed. '
+        'Format: 1-500, 233-235.'
+    )
+    parser.add_argument(
+        '-q', '--quiet', action='store_true', dest='quiet',
+        help='Do not print progress.'
+    )
+    parser.add_argument(
         '-O', '--output-dir', action='store', dest='output_dir', type=str,
         default=None, help="Output directory. If None, a folder named "
         "'_processed_data' will be created in the input directory"
     )
 
     args = parser.parse_args()
+    args.input_basefile_range = get_range_from_string(
+        args.input_basefile_range
+    )
     return args
 
 
@@ -86,7 +134,9 @@ def polar2cart(
     return x, y
 
 
-def get_number_in_a_string(string: str) -> int:
+def get_number_in_a_string(
+    string: str
+) -> int:
     """
     Return the number (int) present in a string.
 
@@ -102,7 +152,10 @@ def get_number_in_a_string(string: str) -> int:
     """
     return list(map(int, re.findall(r'\d+', string)))[0]
 
-def convert_x_y_array_to_mgrid(x_array: np.ndarray, y_array: np.ndarray) -> np.ndarray:
+
+def convert_x_y_array_to_mgrid(
+    x_array: np.ndarray, y_array: np.ndarray
+) -> np.ndarray:
     """
     Convert x and y arrays to a mgrid.
 
@@ -138,11 +191,19 @@ class DataProcessor:
             - /home/user/data/rho
             - /home/user/data/phi
             - /home/user/data/magnetic_field_strength
-    input_basefile : str
+    input_basefile : str, Default: None
         Input basefile name.
         Eg : Benchmark_1.txt
         If None, all the files in the input directory will be processed.
-    output_dir : str
+    input_basefile_range : Tuple[int, int], Default: None
+        Range of input basefiles to be processed.
+        Eg: (1, 5) - Processes files 1 to 5, inclusive.
+        If an input basefile with a number not in this range is encountered,
+        it will be skipped, and the next file will be processed.
+        If None, all the files in the input directory will be processed.
+        *Note:* If input_basefile is not None, input_basefile_range will be
+        ignored.
+    output_dir : str, Default: None
         Output directory. If None, a folder named '_processed_data' will be
         created in the input directory, and the output files will be stored
         there.
@@ -153,20 +214,22 @@ class DataProcessor:
         self,
         input_dir: str,
         input_basefile: str = None,
+        input_basefile_range: Tuple[int, int] = None,
         output_dir: str = None
     ) -> None:
         self.input_dir = input_dir
+        self.input_basefile = input_basefile
+        self.input_basefile_range = input_basefile_range
+
         self.properties = self._get_properties()
 
         self.input_data_files = self._get_input_data_files(
-            input_basefile=input_basefile
+            input_basefile=self.input_basefile,
+            input_basefile_range=self.input_basefile_range
         )
 
-        if output_dir is None:
-            self.output_dir = os.path.join(input_dir, "_processed_data")
-            os.makedirs(self.output_dir, exist_ok=True)
-        else:
-            self.output_dir = output_dir
+        default_path = os.path.join(input_dir, "_processed_data")
+        self.output_dir = output_dir if output_dir else default_path
 
     # Private methods
     def _get_properties(self) -> List[str]:
@@ -186,9 +249,10 @@ class DataProcessor:
         return properties
 
     def _get_input_data_files(
-        self, input_basefile: Union[str, None]
+        self, input_basefile: Union[str, None],
+        input_basefile_range: Union[Tuple[int, int],  None]
     ) -> List[str]:
-        if not (input_basefile is None):
+        if input_basefile is not None:
             self.n_leading_zeros = 4
             return [input_basefile]
         else:
@@ -197,7 +261,12 @@ class DataProcessor:
             )
             filenames.sort(key=get_number_in_a_string)
             self.n_leading_zeros = len(str(len(filenames)))
-            return filenames
+            if input_basefile_range is None:
+                return filenames
+            else:
+                return filenames[
+                    input_basefile_range[0] - 1: input_basefile_range[1]
+                ]
 
     def _get_input_file(self, prop: str, fname: str) -> str:
         """
@@ -292,11 +361,20 @@ class DataProcessor:
         return time, r, theta, scalar_property
 
     # Public methods
-    def process_data(self) -> None:
+    def process_data(
+        self, quiet: bool = False
+    ) -> None:
         """
         Process the data from the input files, and store it as a  single file
         (format: .npz).
+
+        Parameters
+        ----------
+        quiet : bool, Default: False
+            If True, no output will be printed.
         """
+        os.makedirs(self.output_dir, exist_ok=True)
+        
         for fname in self.input_data_files:
             data = dict()
             for prop in self.properties:
@@ -314,7 +392,8 @@ class DataProcessor:
 
             output_fname = self._get_output_fname(fname=fname)
             np.savez(output_fname, **data)
-            print(f"Saved data : {output_fname}")
+            if not quiet:
+                print(f"Saved data : {output_fname}")
 
 
 def main() -> None:
@@ -328,9 +407,10 @@ def main() -> None:
     data_processor = DataProcessor(
         input_dir=input_dir,
         input_basefile=args.input_basefile,
+        input_basefile_range=args.input_basefile_range,
         output_dir=args.output_dir
     )
-    data_processor.process_data()
+    data_processor.process_data(quiet=args.quiet)
 
 
 ###########################################################################
