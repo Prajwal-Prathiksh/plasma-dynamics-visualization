@@ -20,7 +20,7 @@ class AutomatorGUI(HasTraits):
     data_input_dir = Directory()
     quiet = Bool(default_value=True)
     parallel = Bool(default_value=False)
-    batch_size = Int(default_value=1000)
+    batch_size = Int(default_value=300)
 
     traits_view = View(
         Group(
@@ -47,8 +47,8 @@ class AutomatorGUI(HasTraits):
                 name='batch_size',
                 label='Batch Size',
                 enabled_when='parallel',
-                help='The number of files to process in each batch.',
-                tooltip='The number of files to process in each batch.'
+                help='The number of files to process in each batch. Enabled only if parallel is True.',
+                tooltip='The number of files to process in each batch. Enabled only if parallel is True.'
             ),
             show_border=True,
             label='Automator Settings',
