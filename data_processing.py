@@ -16,11 +16,6 @@ from tkinter import filedialog, Tk
 # Code
 ###########################################################################
 
-# TODO
-# - GUI when setup from CLI
-# - should ask for input_dir and output_dir
-# - should ask parallel, or serial
-
 
 def cli_parser() -> Any:
 
