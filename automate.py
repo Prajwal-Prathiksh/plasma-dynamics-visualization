@@ -120,12 +120,16 @@ class DataPreprocessingAutomator(Problem):
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
+    import time
+    tic = time.perf_counter()
     automator = Automator(
         simulation_dir='_automator_TEMP',
         output_dir='_automator_TEMP/output',
         all_problems=[DataPreprocessingAutomator]
     )
     automator.run()
+    toc = time.perf_counter()
     print('Done.')
+    print(f"Time taken: {toc - tic:0.4f} seconds.")
     # Remove the temporary directories.
     shutil.rmtree('_automator_TEMP')
