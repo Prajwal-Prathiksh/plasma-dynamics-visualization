@@ -118,8 +118,8 @@ def main():
                         x, y, phi / 1000, opacity=0.95, extent=ext1)
                     self.scene.mlab.surf(phi, opacity=0.95, extent=ext2)
                     self.scene.parallel_projection = True
-                    self.Units = '* Colorbar Units = V,\
-                        Polar [*1e3]/Cartesian [*1e0]'
+                    self.Units = ('* Colorbar Units = V,' +
+                        'Polar [*1e3]/Cartesian [*1e0]')
                 if self.Property == 'Electron Density':
                     self.scene.mlab.clf()
                     self.scene.mlab.mesh(
@@ -129,8 +129,8 @@ def main():
                         den1 / 3e12, opacity=0.95, extent=ext2)
                     self.scene.mlab.surf(z, color=(0, 0, 0), extent=ext4)
                     self.scene.parallel_projection = True
-                    self.Units = '* Colorbar Units = m−3,\
-                        Polar [*1e15]/Cartesian [*3e12]'
+                    self.Units = ('* Colorbar Units = m−3,' +
+                        'Polar [*1e15]/Cartesian [*3e12]')
                 if self.Property == 'Ion Density':
                     self.scene.mlab.clf()
                     self.scene.mlab.mesh(
@@ -140,8 +140,8 @@ def main():
                         den2 / 3e11, opacity=0.95, extent=ext2)
                     self.scene.mlab.surf(z, color=(0, 0, 0), extent=ext4)
                     self.scene.parallel_projection = True
-                    self.Units = '* Colorbar Units = m−3,\
-                        Polar [*3e15]/Cartesian [*3e11]'
+                    self.Units = ('* Colorbar Units = m−3,' +
+                        'Polar [*3e15]/Cartesian [*3e11]')
                 if self.Property == 'Plasma Density':
                     self.scene.mlab.clf()
                     self.scene.mlab.mesh(
