@@ -4,7 +4,7 @@
 # Standard library imports
 import os
 import argparse
-from typing import Any, List
+from typing import Any
 import numpy as np
 from traits.api import (
     HasTraits, Range, Instance, observe, Enum, Bool, Str, Int, Button
