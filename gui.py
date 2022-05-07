@@ -18,7 +18,7 @@ from traitsui.api import (
 
 
 class MainPipelineGUI(HasTraits):
-    
+
     # Data-preprocessor settings
     run_data_preprocessor = Bool(default_value=False)
     run_visual_setup_simultaneously = Bool(default_value=False)
@@ -144,5 +144,7 @@ if __name__ == '__main__':
     print(f'Parallel: {main_pipeline_gui.parallel}')
     print(f'Batch size: {main_pipeline_gui.batch_size}')
     print(f'Run visual setup: {main_pipeline_gui.run_visual_setup}')
-    print(f'Use data input directory for output: {main_pipeline_gui.use_data_input_dir_for_output}')
-    print(f'Visual data input directory: {main_pipeline_gui.visual_data_input_dir}')
+    print(
+        f'Use data input directory for output: {main_pipeline_gui.use_data_input_dir_for_output}')
+    print(
+        f'Visual data input directory: {main_pipeline_gui.visual_data_input_dir}')

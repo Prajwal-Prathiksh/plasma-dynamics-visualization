@@ -78,7 +78,7 @@ class DataPreprocessingAutomator(Problem):
         self.quiet = main_pipeline_gui.quiet
 
         self.parallel = main_pipeline_gui.parallel
-        self.batch_size = main_pipeline_gui.batch_size          
+        self.batch_size = main_pipeline_gui.batch_size
 
         self.use_data_input_dir_for_output =\
             main_pipeline_gui.use_data_input_dir_for_output
@@ -96,7 +96,6 @@ class DataPreprocessingAutomator(Problem):
                 length=len(temp_obj.input_data_files),
                 batch=self.batch_size
             )
-        
 
         if self.run_data_preprocessor and self.visual_data_input_dir == '':
             self.visual_data_input_dir = os.path.join(
@@ -118,7 +117,7 @@ class DataPreprocessingAutomator(Problem):
     def setup(self):
         self.setup_params()
         self.cases = []
-        
+
         if self.run_data_preprocessor is False:
             print("Skipping data preprocessing.")
             self.cases = []
@@ -166,7 +165,6 @@ class DataPreprocessingAutomator(Problem):
         if self.run_visual_setup:
             print("Running visual setup.")
             self.setup_visualizer()
-        
 
 
 ###########################################################################

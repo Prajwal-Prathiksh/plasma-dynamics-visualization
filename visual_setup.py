@@ -18,6 +18,8 @@ from mayavi.core.ui.api import MayaviScene, SceneEditor, MlabSceneModel
 ###########################################################################
 # Code
 ###########################################################################
+
+
 def cli_parser() -> Any:
     parser = argparse.ArgumentParser(
         allow_abbrev=False,
@@ -33,6 +35,7 @@ def cli_parser() -> Any:
 
     args = parser.parse_args()
     return args
+
 
 class VisualSetupGUI(HasTraits):
     # Traits
@@ -57,18 +60,18 @@ class VisualSetupGUI(HasTraits):
     Axes = Bool(True)
     scene = Instance(MlabSceneModel, ())
 
-    def __init__(self,visual_data_input_dir,**kw):
+    def __init__(self, visual_data_input_dir, **kw):
         """
         Initialize the GUI.
-        
+
         Parameters
         ----------
         visual_data_input_dir : str
             Input directory which contains all the data to be visualized.
         """
-        self.visual_data_input_dir=visual_data_input_dir
+        self.visual_data_input_dir = visual_data_input_dir
         self._setup_data()
-        super(VisualSetupGUI,self).__init__(**kw)
+        super(VisualSetupGUI, self).__init__(**kw)
 
     def _get_data_files(self):
         """
@@ -83,7 +86,7 @@ class VisualSetupGUI(HasTraits):
             for filename in filenames
         ]
         self.data_filenames = filenames
-    
+
     def _setup_data(self):
         """
         Setup the data to be visualized.
@@ -91,16 +94,15 @@ class VisualSetupGUI(HasTraits):
         self._get_data_files()
         self._n_files = len(self.data_filenames)
 
-
-    def _get_ith_filename(self, i:int) -> str:
+    def _get_ith_filename(self, i: int) -> str:
         """
         Get the ith filename.
-        
+
         Parameters
         ----------
         i : int
             Index of the filename.
-        
+
         Returns
         -------
         str
@@ -137,7 +139,7 @@ class VisualSetupGUI(HasTraits):
         ext3 = (-1.2, -0.2, 0.5, 1.5, 0, 0)
         ext4 = (0.2, 1.2, 0, 2, 0, 0)
         self.scene.mlab.view(45.0, 54.735610317245346, 561.0808549293772,
-                                np.array([-0.5, -0.5, 24.66550064]))
+                             np.array([-0.5, -0.5, 24.66550064]))
         if self.Projection == 'Polar x-y':
             if self.Property == 'Potential':
                 self.scene.mlab.clf()
@@ -217,7 +219,7 @@ class VisualSetupGUI(HasTraits):
                 self.scene.mlab.surf(phi, opacity=0.95, extent=ext2)
                 self.scene.parallel_projection = True
                 self.Units = ('* Colorbar Units = V,' +
-                    'Polar [*1e3]/Cartesian [*1e0]')
+                              'Polar [*1e3]/Cartesian [*1e0]')
             if self.Property == 'Electron Density':
                 self.scene.mlab.clf()
                 self.scene.mlab.mesh(
@@ -228,7 +230,7 @@ class VisualSetupGUI(HasTraits):
                 self.scene.mlab.surf(z, color=(0, 0, 0), extent=ext4)
                 self.scene.parallel_projection = True
                 self.Units = ('* Colorbar Units = m−3,' +
-                    'Polar [*1e15]/Cartesian [*3e12]')
+                              'Polar [*1e15]/Cartesian [*3e12]')
             if self.Property == 'Ion Density':
                 self.scene.mlab.clf()
                 self.scene.mlab.mesh(
@@ -239,7 +241,7 @@ class VisualSetupGUI(HasTraits):
                 self.scene.mlab.surf(z, color=(0, 0, 0), extent=ext4)
                 self.scene.parallel_projection = True
                 self.Units = ('* Colorbar Units = m−3,' +
-                    'Polar [*3e15]/Cartesian [*3e11]')
+                              'Polar [*3e15]/Cartesian [*3e11]')
             if self.Property == 'Plasma Density':
                 self.scene.mlab.clf()
                 self.scene.mlab.mesh(
@@ -342,21 +344,23 @@ class VisualSetupGUI(HasTraits):
             ax.axes.font_factor = 0.8
 
     view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene),
-                        height=800, width=1500, show_label=False),
+                     height=800, width=1500, show_label=False),
                 VGroup(Item('Iteration')),
                 HSplit(
-                        Group(Item('Projection'), Item('Property')),
-                        Group(Item('Colorbar'), Item('Title')),
-                        Group(Item('Details'), Item('Axes')),
-                    ),
-                Item(name='update_files', show_label=False),
-                resizable=True,)
+        Group(Item('Projection'), Item('Property')),
+        Group(Item('Colorbar'), Item('Title')),
+        Group(Item('Details'), Item('Axes')),
+    ),
+        Item(name='update_files', show_label=False),
+        resizable=True,)
+
 
 def main(visual_data_input_dir):
     visual_setup_gui = VisualSetupGUI(
         visual_data_input_dir=visual_data_input_dir
     )
     visual_setup_gui.configure_traits()
+
 
 ###########################################################################
 # Main Code
