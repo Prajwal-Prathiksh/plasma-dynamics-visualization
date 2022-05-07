@@ -141,7 +141,7 @@ class DataPreprocessingAutomator(Problem):
             print("Running visual setup simultaneously.")
 
         if self.parallel:
-            temp_cases = [
+            self.cases += [
                 Simulation(
                     root=f"_parallel_{i}_data_preprocessing_TEMP",
                     base_command=base_cmd,
@@ -150,11 +150,6 @@ class DataPreprocessingAutomator(Problem):
                 )
                 for i in range(1, len(self.batch_limits))
             ]
-            # for i, case in enumerate(temp_cases):
-            #     if i >= 1:
-            #         case.depends = temp_cases[0:i]
-            #self.cases[0].depends = [temp_cases[0]]
-            self.cases = temp_cases + self.cases
         else:
             self.cases += [
                 Simulation(
