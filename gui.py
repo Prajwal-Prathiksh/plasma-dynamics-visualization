@@ -17,11 +17,18 @@ from traitsui.api import (
 ###########################################################################
 
 
-class AutomatorGUI(HasTraits):
+class MainPipelineGUI(HasTraits):
+    
+    # Automator settings
     data_input_dir = Directory()
     quiet = Bool(default_value=True)
     parallel = Bool(default_value=False)
     batch_size = Int(default_value=300)
+
+    # Visualization settings
+    use_data_input_dir_for_output = Bool(default_value=True)
+    visual_data_input_dir = Directory()
+    run_visual_setup = Bool(default_value=True)
 
     traits_view = View(
         Group(
@@ -66,7 +73,35 @@ class AutomatorGUI(HasTraits):
                 'Enabled only if parallel is True.'
             ),
             show_border=True,
-            label='Automator Settings',
+            label='Data-Preprocessor Settings'
+        ),
+        Group(
+            Item(
+                name='use_data_input_dir_for_output',
+                label='Read Data from Data Input Directory',
+                help='If True, the visualizer will read the data from '
+                'the data input directory. If False, the visualizer will '
+                'read the data from the Visual Data Input Directory.',
+                tooltip='If True, the visualizer will read the data from '
+                'the data input directory. If False, the visualizer will '
+                'read the data from the Visual Data Input Directory.'
+            ),
+            Item(
+                name='visual_data_input_dir',
+                label='Visual Data Input Directory',
+                enabled_when='not use_data_input_dir_for_output',
+                help='Input directory which contains all the data. '
+                '\nEg : /home/user/data/_processed_data',
+                tooltip='Input directory which contains all the data.'
+            ),
+            Item(
+                name='run_visual_setup',
+                label='Run Visual Setup',
+                help='If True, the visualizer will be setup.',
+                tooltip='If True, the visualizer will be setup.'
+            ),
+            show_border=True,
+            label='Visual Setup Settings',
         ),
         buttons=[OKButton, CancelButton, HelpButton],
         title='Automator',
@@ -78,9 +113,12 @@ class AutomatorGUI(HasTraits):
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    automator_gui = AutomatorGUI()
-    automator_gui.configure_traits()
-    print(f'Data input directory: {automator_gui.data_input_dir}')
-    print(f'Quiet: {automator_gui.quiet}')
-    print(f'Parallel: {automator_gui.parallel}')
-    print(f'Batch size: {automator_gui.batch_size}')
+    main_pipeline_gui = MainPipelineGUI()
+    main_pipeline_gui.configure_traits()
+    print(f'Data input directory: {main_pipeline_gui.data_input_dir}')
+    print(f'Quiet: {main_pipeline_gui.quiet}')
+    print(f'Parallel: {main_pipeline_gui.parallel}')
+    print(f'Batch size: {main_pipeline_gui.batch_size}')
+    print(f'Use data input directory for output: {main_pipeline_gui.use_data_input_dir_for_output}')
+    print(f'Visual data input directory: {main_pipeline_gui.visual_data_input_dir}')
+    print(f'Run visual setup: {main_pipeline_gui.run_visual_setup}')
