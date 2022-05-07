@@ -2,13 +2,15 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import os
 import shutil
 from typing import Tuple
 from automan.api import Problem, Simulation, Automator
 
 # Local imports
 from data_processing import DataProcessor
-from gui import AutomatorGUI
+from gui import MainPipelineGUI
+from visual_setup import VisualSetupGUI
 
 ###########################################################################
 # Code
@@ -61,48 +63,100 @@ class DataPreprocessingAutomator(Problem):
         return "_data_preprocessing_TEMP"
 
     def setup_params(self):
-        automate_gui = AutomatorGUI()
-        automate_gui.configure_traits()
+        main_pipeline_gui = MainPipelineGUI()
+        main_pipeline_gui.configure_traits()
 
-        data_input_dir = automate_gui.data_input_dir
-        if data_input_dir == '' or data_input_dir is None:
+        self.run_data_preprocessor = main_pipeline_gui.run_data_preprocessor
+        self.run_visual_setup_simultaneously =\
+            main_pipeline_gui.run_visual_setup_simultaneously
+
+        data_input_dir = main_pipeline_gui.data_input_dir
+        if data_input_dir == '' and self.run_data_preprocessor:
             raise ValueError('No data input directory specified.')
 
         self.data_input_dir = f'"{data_input_dir}"'
-        self.quiet = automate_gui.quiet
+        self.quiet = main_pipeline_gui.quiet
 
-        self.parallel = automate_gui.parallel
-        self.batch_size = automate_gui.batch_size
+        self.parallel = main_pipeline_gui.parallel
+        self.batch_size = main_pipeline_gui.batch_size          
+
+        self.use_data_input_dir_for_output =\
+            main_pipeline_gui.use_data_input_dir_for_output
+        self.visual_data_input_dir = main_pipeline_gui.visual_data_input_dir
+        self.run_visual_setup = main_pipeline_gui.run_visual_setup
 
         if self.parallel and self.batch_size is None:
             raise ValueError(
                 "If parallel is True, batch_size per job must be set."
             )
-        temp_obj = DataProcessor(input_dir=data_input_dir)
-        self.batch_limits = get_batch_limits(
-            length=len(temp_obj.input_data_files),
-            batch=self.batch_size
+
+        if self.run_data_preprocessor:
+            temp_obj = DataProcessor(input_dir=data_input_dir)
+            self.batch_limits = get_batch_limits(
+                length=len(temp_obj.input_data_files),
+                batch=self.batch_size
+            )
+        
+
+        if self.run_data_preprocessor and self.visual_data_input_dir == '':
+            self.visual_data_input_dir = os.path.join(
+                data_input_dir, '_processed_data'
+            )
+        elif self.run_visual_setup and self.visual_data_input_dir == '':
+            raise ValueError(
+                'No visual data input directory specified. '
+                'Please set the visual data input directory.'
+            )
+        self.visual_data_input_dir = f'"{self.visual_data_input_dir}"'
+
+    def setup_visualizer(self):
+        visual_setup_gui = VisualSetupGUI(
+            visual_data_input_dir=self.visual_data_input_dir,
         )
+        visual_setup_gui.configure_traits()
 
     def setup(self):
         self.setup_params()
+        self.cases = []
+        
+        if self.run_data_preprocessor is False:
+            print("Skipping data preprocessing.")
+            self.cases = []
+            return
+
         if self.quiet:
             base_cmd = 'python data_processing.py --quiet'
         else:
             base_cmd = 'python data_processing.py'
 
+        if self.run_visual_setup_simultaneously:
+            temp_base_cmd = 'python visual_setup.py'
+            self.cases.append(
+                Simulation(
+                    root="_visual_setup_TEMP",
+                    base_command=temp_base_cmd,
+                    visual_data_input_dir=self.visual_data_input_dir,
+                )
+            )
+            print("Running visual setup simultaneously.")
+
         if self.parallel:
-            self.cases = [
+            temp_cases = [
                 Simulation(
                     root=f"_parallel_{i}_data_preprocessing_TEMP",
                     base_command=base_cmd,
                     input_dir=self.data_input_dir,
                     range=tuple2string(self.batch_limits[i]),
                 )
-                for i in range(len(self.batch_limits))
+                for i in range(1, len(self.batch_limits))
             ]
+            # for i, case in enumerate(temp_cases):
+            #     if i >= 1:
+            #         case.depends = temp_cases[0:i]
+            #self.cases[0].depends = [temp_cases[0]]
+            self.cases = temp_cases + self.cases
         else:
-            self.cases = [
+            self.cases += [
                 Simulation(
                     root="_series_data_preprocessing_TEMP",
                     base_command=base_cmd,
@@ -114,6 +168,10 @@ class DataPreprocessingAutomator(Problem):
 
     def run(self):
         self.make_output_dir()
+        if self.run_visual_setup:
+            print("Running visual setup.")
+            self.setup_visualizer()
+        
 
 
 ###########################################################################
