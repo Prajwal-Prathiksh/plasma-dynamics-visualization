@@ -43,7 +43,8 @@ class VisualSetupGUI(HasTraits):
         low='_low',
         high='_n_files',
         value=0,
-        desc='Iteration number'
+        desc='Iteration number',
+        mode='slider'
     )
     _n_files = Int(0)
     _low = Int(0)

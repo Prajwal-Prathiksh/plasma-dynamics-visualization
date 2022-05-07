@@ -106,7 +106,7 @@ class DataPreprocessingAutomator(Problem):
                 'No visual data input directory specified. '
                 'Please set the visual data input directory.'
             )
-        self.visual_data_input_dir = f'"{self.visual_data_input_dir}"'
+        #self.visual_data_input_dir = f'"{self.visual_data_input_dir}"'
 
     def setup_visualizer(self):
         visual_setup_gui = VisualSetupGUI(
