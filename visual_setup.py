@@ -9,7 +9,7 @@ import numpy as np
 from traits.api import (
     HasTraits, Range, Instance, observe, Enum, Bool, Str, Int, Button
 )
-from traitsui.api import View, Item, Group, HSplit
+from traitsui.api import View, Item, Group, HSplit, VGroup
 from mayavi.core.ui.api import MayaviScene, SceneEditor, MlabSceneModel
 
 # Local imports
@@ -343,7 +343,7 @@ class VisualSetupGUI(HasTraits):
 
     view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene),
                         height=800, width=1500, show_label=False),
-                Group(Item('Iteration')),
+                VGroup(Item('Iteration')),
                 HSplit(
                         Group(Item('Projection'), Item('Property')),
                         Group(Item('Colorbar'), Item('Title')),
